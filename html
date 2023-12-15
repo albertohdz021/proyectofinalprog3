@@ -1,0 +1,172 @@
+# proyectofinalprog3
+OCTYPE html>
+<html lang="es">
+
+<head>
+    <title>YourAgenda</title>
+    <meta charset=utf-8>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+    <style>
+        #contenedor {
+            width: 420px;
+        }
+
+        #gbotones {
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 5px;
+        }
+
+        .badge-info {
+            background-color: #5bc0de;
+        }
+    </style>
+</head>
+
+<body onload="actualizarDatos()">
+    <div id="contenedor" class="container">
+        <header>
+            <h3>Agenda de contactos
+                <small> Ver 1.0</small>
+            </h3>
+            <hr>
+        </header>
+
+        <form class="form-inline">
+
+            <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1">@</span>
+                <input type="text" class="form-control" placeholder="Nombre" id="nombre" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1"> +1 </span>
+                <input type="text" class="form-control" placeholder="Numero de telefono" id="movil" aria-describedby="basic-addon1">
+            </div>
+
+            <div class="input-group">
+                <input type="email" class="form-control" placeholder="Correo electronico" id="email" aria-describedby="basic-addon1">
+            </div>
+
+        </form>
+        <hr/>
+
+        <div id="gbotones" class="btn-group" role="group" aria-label="...">
+            <button type="button" onclick="guardarDato()" class="btn btn-info">
+                <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Guardar
+            </button>
+            <button type="button" onclick="recuperarDato()" class="btn btn-success">
+                <span class="glyphicon glyphicon-floppy-open" aria-hidden="true"></span> Consultar
+            </button>
+            <button type="button" onclick="eliminarDato()" class="btn btn-danger">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Eliminar
+            </button>
+
+        </div>
+
+        <button type="button" onclick="eliminarTodo()" class="btn btn-danger">
+            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Eliminar Todos
+        </button>
+        <hr>
+
+        <div id="contactos">
+        </div>
+
+    </div>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    function guardarDato() {
+        // Capturando Variables
+        var nombre = document.getElementById("nombre").value;
+        var movil = document.getElementById("movil").value;
+        var email = document.getElementById("email").value;
+
+        // Generando un avatar único
+        var avatarURL = 'http://api.adorable.io/avatars/80/' + email + '.png';
+        var datos = {
+            'movil': movil,
+            'email': email,
+            'avatarURL': avatarURL
+        };
+
+        // Almacenando los datos
+        localStorage.setItem(nombre, JSON.stringify(datos));
+
+        // Borrando los datos
+        document.getElementById("nombre").value = "";
+        document.getElementById("movil").value = "";
+        document.getElementById("email").value = "";
+
+        // Actualizando la lista
+        actualizarDatos();
+    }
+
+    function recuperarDato() {
+        // Capturando el nombre
+        var nombre = document.getElementById("nombre").value;
+
+        // Parseando los datos
+        var datos = localStorage.getItem(nombre);
+        datos = JSON.parse(datos);
+
+        // Incluyendo los datos en el HTML
+        document.getElementById("movil").value = datos.movil;
+        document.getElementById("email").value = datos.email;
+    }
+
+    function eliminarDato() {
+        // Capturando el nombre
+        var nombre = document.getElementById("nombre").value;
+
+        // Borrando el dato
+        localStorage.removeItem(nombre);
+
+        // Actualizando la lista
+        actualizarDatos();
+    }
+
+    function eliminarTodo() {
+        // Borrando todos los datos
+        localStorage.clear();
+
+        // Actualizando la lista
+        actualizarDatos();
+    }
+
+    function actualizarDatos() {
+        var elementos = "";
+
+        // Verificando si existen datos
+        if (localStorage.length === 0) {
+            elementos += '<div class="panel panel-default"><div class="panel-body">Vacío</div></div>';
+        } else {
+            // Enriqueciendo "elementos" con cada par de valores almacenados
+            for (var i = 0; i <= localStorage.length - 1; i++) {
+                var key = localStorage.key(i);
+
+                // Parseando los datos
+                var datos = localStorage.getItem(key);
+                datos = JSON.parse(datos);
+
+                // Enriqueciendo los datos con HTML
+                elementos += '<div class="panel panel-default"><div class="panel-body">';
+                elementos += '<div class="col-xs-3">';
+                elementos += '<img src="' + datos.avatarURL + '">';
+                elementos += '</div><div class="col-xs-9">';
+                elementos += '<p><b>' + key + '</b></p>';
+                elementos += '<a href="tel:+34' + datos.movil + '"><p><span class="glyphicon glyphicon-phone" aria-hidden="true"></span> ' + datos.movil + '</p></a>';
+                elementos += '<a href="mailto:' + datos.email + '"><p><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> ' + datos.email + '</p></a>';
+                elementos += '</div></div></div>';
+            }
+        }
+        // Actualizando "#contactos" con los "elementos" previamente enriquecidos
+        document.getElementById('contactos').innerHTML = elementos;
+    }
+</script>
+
+</html>
